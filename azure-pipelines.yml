@@ -4,7 +4,6 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-# ✅ Use only the variable group
 variables:
 - group: JFrog-Secrets
 
@@ -29,10 +28,10 @@ steps:
     echo "type: maven" > ~/.jfrog/projects/maven.yaml
     echo "resolver:" >> ~/.jfrog/projects/maven.yaml
     echo "  serverId: devops-jfrog" >> ~/.jfrog/projects/maven.yaml
-    echo "  repo: devops-demo-repo-libs-snapshot" >> ~/.jfrog/projects/maven.yaml
+    echo "  repo: $(ARTIFACTORY_REPO)" >> ~/.jfrog/projects/maven.yaml
     echo "deployer:" >> ~/.jfrog/projects/maven.yaml
     echo "  serverId: devops-jfrog" >> ~/.jfrog/projects/maven.yaml
-    echo "  repo: devops-demo-repo-libs-snapshot" >> ~/.jfrog/projects/maven.yaml
+    echo "  repo: $(ARTIFACTORY_REPO)" >> ~/.jfrog/projects/maven.yaml
   displayName: 'Create JFrog CLI Maven project config'
 
 - script: |
