@@ -43,7 +43,7 @@ steps:
   displayName: 'Maven Build'
 
 - script: |
-    jfrog rt mvn "clean install deploy" \
+    jfrog rt mvn clean install deploy \
       --build-name="jfrog-maven-build" \
       --build-number="$(Build.BuildId)"
   displayName: 'Build and Deploy to Artifactory using JFrog CLI'
