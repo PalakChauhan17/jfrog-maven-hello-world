@@ -1,0 +1,36 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  ARTIFACTORY_URL: 'https://trialrgyqe6.jfrog.io/artifactory'
+  ARTIFACTORY_REPO: 'devops-demo-repo-libs-snapshot'
+  MAVEN_PROJECT_DIR: '.'
+
+steps:
+- checkout: self
+
+- script: |
+    curl -fL https://getcli.jfrog.io | sh
+    sudo mv jfrog /usr/local/bin/jfrog
+  displayName: 'Install JFrog CLI'
+
+- script: |
+    jfrog config add devops-jfrog \
+      --url=$(ARTIFACTORY_URL) \
+      --user=$(artifactoryUser) \
+      --password=$(artifactoryPassword) \
+      --interactive=false
+  displayName: 'Configure JFrog CLI'
+
+- script: |
+    mvn clean install
+  displayName: 'Maven Build'
+
+- script: |
+    jfrog rt mvn "deploy" pom.xml \
+      --build-name="jfrog-maven-build" \
+      --build-number="$(Build.BuildId)"
+  displayName: 'Deploy to Artifactory using JFrog CLI'
