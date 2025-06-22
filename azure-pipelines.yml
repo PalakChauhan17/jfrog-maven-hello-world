@@ -10,23 +10,27 @@ variables:
 steps:
 - checkout: self
 
+# Install JFrog CLI
 - script: |
     curl -fL https://getcli.jfrog.io | sh
     sudo mv jfrog /usr/local/bin/jfrog
   displayName: 'Install JFrog CLI'
 
+# Debug: Show Artifactory URL
 - script: |
     echo "ARTIFACTORY_URL is: '$(ARTIFACTORY_URL)'"
   displayName: 'Debug: Show Artifactory URL'
 
+# Configure JFrog CLI
 - script: |
     jfrog config add devops-jfrog \
-      --url=https://trialrgyqe6.jfrog.io \
+      --url=$(ARTIFACTORY_URL) \
       --user=$(artifactoryUser) \
       --password=$(artifactoryPassword) \
       --interactive=false
   displayName: 'Configure JFrog CLI'
 
+# Create Maven project config for JFrog CLI
 - script: |
     mkdir -p ~/.jfrog/projects
     echo "type: maven" > ~/.jfrog/projects/maven.yaml
@@ -38,22 +42,32 @@ steps:
     echo "  repo: $(ARTIFACTORY_REPO)" >> ~/.jfrog/projects/maven.yaml
   displayName: 'Create JFrog CLI Maven project config'
 
-- script: |
-    mvn -version
-    java -version
-  displayName: 'Check Maven and Java versions'
-
+# Clear Maven local repository cache to avoid corrupt artifacts
 - script: |
     rm -rf ~/.m2/repository
-  displayName: 'Clean Maven Cache'
+  displayName: 'Clear Maven Local Repository Cache'
 
+# Print Java and Maven versions for debugging
+- script: |
+    java -version
+    mvn -version
+  displayName: 'Check Java and Maven Versions'
+
+# Run Maven build with debug logging (-X)
+- script: |
+    export MAVEN_OPTS="--add-opens java.base/java.util=ALL-UNNAMED"
+    mvn clean install -X
+  displayName: 'Run Maven Build with Debug Logging'
+
+# Build and deploy using JFrog CLI (no quotes around goals)
 - script: |
     export MAVEN_OPTS="--add-opens java.base/java.util=ALL-UNNAMED"
     jfrog rt mvn clean install deploy \
       --build-name="jfrog-maven-build" \
-      --build-number="$(Build.BuildId)" -X
-  displayName: 'Build and Deploy to Artifactory with Debug Logging'
+      --build-number="$(Build.BuildId)"
+  displayName: 'Build and Deploy to Artifactory using JFrog CLI'
 
+# Publish build info to Artifactory
 - script: |
     jfrog rt build-publish jfrog-maven-build $(Build.BuildId)
   displayName: 'Publish Build Info to Artifactory'
