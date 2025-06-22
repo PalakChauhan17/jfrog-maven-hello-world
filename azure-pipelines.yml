@@ -21,11 +21,12 @@ steps:
 
 - script: |
     jfrog config add devops-jfrog \
-      --url=$(ARTIFACTORY_URL) \
+      --url=https://trialrgyqe6.jfrog.io/artifactory \
       --user=$(artifactoryUser) \
       --password=$(artifactoryPassword) \
       --interactive=false
   displayName: 'Configure JFrog CLI'
+
 
 - script: |
     mkdir -p ~/.jfrog/projects
