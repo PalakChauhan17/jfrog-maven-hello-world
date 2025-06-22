@@ -4,21 +4,12 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+# ✅ Use only the variable group
 variables:
-  ARTIFACTORY_URL: 'https://trialrgyqe6.jfrog.io/artifactory'
-  ARTIFACTORY_REPO: 'devops-demo-repo-libs-snapshot'
-  MAVEN_PROJECT_DIR: '.'
+- group: JFrog-Secrets
 
 steps:
 - checkout: self
-
-# Import secret variable group here
-- task: AzurePipeline@1
-  inputs:
-    script: echo "Using secret group"
-  env:
-    artifactoryUser: $(artifactoryUser)
-    artifactoryPassword: $(artifactoryPassword)
 
 - script: |
     curl -fL https://getcli.jfrog.io | sh
