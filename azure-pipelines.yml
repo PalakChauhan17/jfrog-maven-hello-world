@@ -9,11 +9,16 @@ variables:
   ARTIFACTORY_REPO: 'devops-demo-repo-libs-snapshot'
   MAVEN_PROJECT_DIR: '.'
 
-# ✅ This should be a separate `variables` block (array format)
-- group: JFrog-Secrets
-
 steps:
 - checkout: self
+
+# Import secret variable group here
+- task: AzurePipeline@1
+  inputs:
+    script: echo "Using secret group"
+  env:
+    artifactoryUser: $(artifactoryUser)
+    artifactoryPassword: $(artifactoryPassword)
 
 - script: |
     curl -fL https://getcli.jfrog.io | sh
@@ -28,7 +33,6 @@ steps:
       --interactive=false
   displayName: 'Configure JFrog CLI'
 
-# 🔧 Safe echo-based config creation
 - script: |
     mkdir -p ~/.jfrog/projects
     echo "type: maven" > ~/.jfrog/projects/maven.yaml
