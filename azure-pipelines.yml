@@ -20,14 +20,10 @@ steps:
   displayName: 'Debug: Show Artifactory URL'
 
 - script: |
-    curl -v $(ARTIFACTORY_URL)/api/system/ping
-  displayName: 'Test Artifactory API connectivity'
-
-- script: |
     jfrog config add devops-jfrog \
-      --url=$(ARTIFACTORY_URL) \
+      --url=https://trialrgyqe6.jfrog.io/artifactory \
       --user=$(artifactoryUser) \
-      --apikey=$(artifactoryApiKey) \
+      --password=$(artifactoryPassword) \
       --interactive=false
   displayName: 'Configure JFrog CLI'
 
@@ -43,11 +39,20 @@ steps:
   displayName: 'Create JFrog CLI Maven project config'
 
 - script: |
+    mvn -version
+    java -version
+  displayName: 'Check Maven and Java versions'
+
+- script: |
+    rm -rf ~/.m2/repository
+  displayName: 'Clean Maven Cache'
+
+- script: |
     export MAVEN_OPTS="--add-opens java.base/java.util=ALL-UNNAMED"
     jfrog rt mvn clean install deploy \
       --build-name="jfrog-maven-build" \
-      --build-number="$(Build.BuildId)"
-  displayName: 'Build and Deploy to Artifactory using JFrog CLI'
+      --build-number="$(Build.BuildId)" -X
+  displayName: 'Build and Deploy to Artifactory with Debug Logging'
 
 - script: |
     jfrog rt build-publish jfrog-maven-build $(Build.BuildId)
