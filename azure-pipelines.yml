@@ -51,5 +51,3 @@ EOF
 - script: |
     jfrog rt build-publish jfrog-maven-build $(Build.BuildId)
   displayName: 'Publish Build Info to Artifactory'
-
-
