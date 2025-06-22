@@ -5,7 +5,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-- group: JFrog-Secrets  # Make sure this group contains artifactoryUser, artifactoryPassword, ARTIFACTORY_URL, ARTIFACTORY_REPO
+- group: JFrog-Secrets   # contains artifactoryUser, artifactoryPassword, ARTIFACTORY_URL, ARTIFACTORY_REPO
 
 steps:
 - checkout: self
@@ -16,24 +16,22 @@ steps:
     sudo mv jfrog /usr/local/bin/jfrog
   displayName: 'Install JFrog CLI'
 
-# Debug: Show Artifactory URL variable
+# Debug: Show Artifactory URL and Repo
 - script: |
     echo "ARTIFACTORY_URL is: '$(ARTIFACTORY_URL)'"
-  displayName: 'Debug: Show Artifactory URL'
+    echo "ARTIFACTORY_REPO is: '$(ARTIFACTORY_REPO)'"
+  displayName: 'Debug: Show Artifactory URL and Repo'
 
-# Configure JFrog CLI with correct URL including /artifactory
+# Configure JFrog CLI with Artifactory credentials
 - script: |
     jfrog config add devops-jfrog \
       --url=$(ARTIFACTORY_URL) \
       --user=$(artifactoryUser) \
       --password=$(artifactoryPassword) \
       --interactive=false
+  displayName: 'Configure JFrog CLI'
 
-    # Verify the connection with ping
-    jfrog rt ping
-  displayName: 'Configure JFrog CLI and Ping Artifactory'
-
-# Create JFrog CLI Maven project config
+# Create Maven project config for JFrog CLI
 - script: |
     mkdir -p ~/.jfrog/projects
     echo "type: maven" > ~/.jfrog/projects/maven.yaml
@@ -45,24 +43,17 @@ steps:
     echo "  repo: $(ARTIFACTORY_REPO)" >> ~/.jfrog/projects/maven.yaml
   displayName: 'Create JFrog CLI Maven project config'
 
-# Clear Maven local repository cache to avoid conflicts
-- script: |
-    rm -rf ~/.m2/repository
+# Clear Maven local cache (optional but useful to avoid caching issues)
+- script: rm -rf ~/.m2/repository
   displayName: 'Clear Maven Local Repository Cache'
 
-# Verify Java and Maven versions
+# Verify Java and Maven versions (for debugging)
 - script: |
     java -version
     mvn -version
   displayName: 'Verify Java and Maven Versions'
 
-# Run Maven build with debug logging (-X)
-- script: |
-    export MAVEN_OPTS="--add-opens java.base/java.util=ALL-UNNAMED"
-    mvn clean install -X
-  displayName: 'Run Maven Build with Debug Logging'
-
-# Build and deploy using JFrog CLI
+# Run Maven build with JFrog CLI integration and deploy artifacts
 - script: |
     export MAVEN_OPTS="--add-opens java.base/java.util=ALL-UNNAMED"
     jfrog rt mvn clean install deploy \
