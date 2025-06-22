@@ -4,16 +4,36 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+- group: JFrog-Secrets  # contains artifactoryUser, artifactoryPassword, ARTIFACTORY_URL, ARTIFACTORY_REPO
+
 steps:
 - checkout: self
 
-- script: rm -rf ~/.m2/repository
-  displayName: Clear Maven Cache
+- script: |
+    curl -fL https://getcli.jfrog.io | sh
+    sudo mv jfrog /usr/local/bin/jfrog
+  displayName: 'Install JFrog CLI'
 
 - script: |
-    java -version
-    mvn -version
-  displayName: Verify Java and Maven Versions
+    echo "ARTIFACTORY_URL is: $(ARTIFACTORY_URL)"
+  displayName: 'Debug Artifactory URL'
 
-- script: mvn clean install -X
-  displayName: Maven Build with Debug Logging
+- script: |
+    jfrog config add devops-jfrog \
+      --url="$(ARTIFACTORY_URL)" \
+      --user="$(artifactoryUser)" \
+      --password="$(artifactoryPassword)" \
+      --interactive=false
+  displayName: 'Configure JFrog CLI'
+
+- script: |
+    export MAVEN_OPTS="--add-opens java.base/java.util=ALL-UNNAMED"
+    jfrog rt mvn clean install deploy \
+      --build-name="jfrog-maven-build" \
+      --build-number="$(Build.BuildId)"
+  displayName: 'Build and Deploy with JFrog CLI'
+
+- script: |
+    jfrog rt build-publish jfrog-maven-build $(Build.BuildId)
+  displayName: 'Publish Build Info to Artifactory'
