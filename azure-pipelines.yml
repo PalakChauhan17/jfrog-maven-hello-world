@@ -5,7 +5,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: jfrog-secrets
+  - group: JFrog-Secrets  # Corrected variable group name
 
 steps:
 - checkout: self
@@ -40,10 +40,10 @@ deployer:
 EOF
   displayName: 'Create JFrog CLI Maven project config'
 
-- script: >
-    jfrog rt mvn "deploy"
-    --build-name="jfrog-maven-build"
-    --build-number="$(Build.BuildId)"
+- script: |
+    jfrog rt mvn "deploy" \
+      --build-name="jfrog-maven-build" \
+      --build-number="$(Build.BuildId)"
   displayName: 'Deploy to Artifactory using JFrog CLI'
 
 - script: |
