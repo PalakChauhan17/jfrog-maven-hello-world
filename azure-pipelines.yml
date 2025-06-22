@@ -30,19 +30,17 @@ steps:
   displayName: 'Maven Build'
 
 - script: |
-    mkdir -p ~/.jfrog
-    echo '{
-      "type": "maven",
-      "resolver": {
-        "serverId": "devops-jfrog",
-        "repo": "devops-demo-repo-libs-snapshot"
-      },
-      "deployer": {
-        "serverId": "devops-jfrog",
-        "repo": "devops-demo-repo-libs-snapshot"
-      }
-    }' > ~/.jfrog/projects
-  displayName: 'Manually Configure Maven Project for JFrog CLI'
+    mkdir -p ~/.jfrog/projects
+    echo 'type: maven
+resolver:
+  serverId: devops-jfrog
+  repo: devops-demo-repo-libs-snapshot
+deployer:
+  serverId: devops-jfrog
+  repo: devops-demo-repo-libs-snapshot
+' > ~/.jfrog/projects/maven.yaml
+  displayName: 'Create JFrog CLI Maven project config'
+
 
 - script: >
     jfrog rt mvn "deploy"
