@@ -5,7 +5,13 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  - group: JFrog-Secrets  # Corrected variable group name
+  ARTIFACTORY_URL: 'https://trialrgyqe6.jfrog.io/artifactory'
+  ARTIFACTORY_REPO: 'devops-demo-repo-libs-snapshot'
+  MAVEN_PROJECT_DIR: '.'
+
+# Link your variable group that holds secrets
+variables:
+- group: JFrog-Secrets
 
 steps:
 - checkout: self
@@ -17,15 +23,11 @@ steps:
 
 - script: |
     jfrog config add devops-jfrog \
-      --url=https://trialrgyqe6.jfrog.io/artifactory \
+      --url=$(ARTIFACTORY_URL) \
       --user=$(artifactoryUser) \
       --password=$(artifactoryPassword) \
       --interactive=false
   displayName: 'Configure JFrog CLI'
-
-- script: |
-    mvn clean install
-  displayName: 'Maven Build'
 
 - script: |
     mkdir -p ~/.jfrog/projects
@@ -41,7 +43,11 @@ EOF
   displayName: 'Create JFrog CLI Maven project config'
 
 - script: |
-    jfrog rt mvn "deploy" \
+    mvn clean install
+  displayName: 'Maven Build'
+
+- script: |
+    jfrog rt mvn deploy \
       --build-name="jfrog-maven-build" \
       --build-number="$(Build.BuildId)"
   displayName: 'Deploy to Artifactory using JFrog CLI'
