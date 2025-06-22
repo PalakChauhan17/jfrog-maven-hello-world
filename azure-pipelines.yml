@@ -7,7 +7,6 @@ pool:
 variables:
   ARTIFACTORY_URL: 'https://trialrgyqe6.jfrog.io/artifactory'
   ARTIFACTORY_REPO: 'devops-demo-repo-libs-snapshot'
-  MAVEN_PROJECT_DIR: '.'
 
 steps:
 - checkout: self
@@ -26,26 +25,10 @@ steps:
   displayName: 'Configure JFrog CLI'
 
 - script: |
-    mvn clean install
-  displayName: 'Maven Build'
-
-- script: |
-    mkdir -p ~/.jfrog/projects
-    echo "type: maven
-resolver:
-  serverId: devops-jfrog
-  repo: devops-demo-repo-libs-snapshot
-deployer:
-  serverId: devops-jfrog
-  repo: devops-demo-repo-libs-snapshot" > ~/.jfrog/projects/maven.yaml
-  displayName: 'Create JFrog CLI Maven project config'
-
-- script: |
-    jfrog rt mvn "deploy" \
-      --build-name="jfrog-maven-build" \
-      --build-number="$(Build.BuildId)"
-  displayName: 'Deploy to Artifactory using JFrog CLI'
+    mvn clean deploy \
+      -DaltDeploymentRepository=devops-jfrog::default::$(ARTIFACTORY_URL)/$(ARTIFACTORY_REPO)
+  displayName: 'Maven Build and Deploy'
 
 - script: |
     jfrog rt build-publish jfrog-maven-build $(Build.BuildId)
-  displayName: 'Publish Build Info to Artifactory'
+  displayName: 'Publish Build Info'
