@@ -21,7 +21,7 @@ steps:
 
 - script: |
     jfrog config add devops-jfrog \
-      --url=https://trialrgyqe6.jfrog.io \
+      --url=$(ARTIFACTORY_URL) \
       --user=$(artifactoryUser) \
       --password=$(artifactoryPassword) \
       --interactive=false
@@ -39,11 +39,8 @@ steps:
   displayName: 'Create JFrog CLI Maven project config'
 
 - script: |
-    mvn clean install
-  displayName: 'Maven Build'
-
-- script: |
-    jfrog rt mvn clean install deploy \
+    export MAVEN_OPTS="--add-opens java.base/java.util=ALL-UNNAMED"
+    jfrog rt mvn "clean install deploy" \
       --build-name="jfrog-maven-build" \
       --build-number="$(Build.BuildId)"
   displayName: 'Build and Deploy to Artifactory using JFrog CLI'
