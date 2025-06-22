@@ -5,8 +5,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  ARTIFACTORY_URL: 'https://trialrgyqe6.jfrog.io/artifactory'
-  ARTIFACTORY_REPO: 'devops-demo-repo-libs-snapshot'
+  - group: jfrog-secrets
 
 steps:
 - checkout: self
@@ -18,17 +17,35 @@ steps:
 
 - script: |
     jfrog config add devops-jfrog \
-      --url=$(ARTIFACTORY_URL) \
+      --url=https://trialrgyqe6.jfrog.io/artifactory \
       --user=$(artifactoryUser) \
       --password=$(artifactoryPassword) \
       --interactive=false
   displayName: 'Configure JFrog CLI'
 
 - script: |
-    mvn clean deploy \
-      -DaltDeploymentRepository=devops-jfrog::default::$(ARTIFACTORY_URL)/$(ARTIFACTORY_REPO)
-  displayName: 'Maven Build and Deploy'
+    mvn clean install
+  displayName: 'Maven Build'
+
+- script: |
+    mkdir -p ~/.jfrog/projects
+    cat > ~/.jfrog/projects/maven.yaml <<EOF
+type: maven
+resolver:
+  serverId: devops-jfrog
+  repo: devops-demo-repo-libs-snapshot
+deployer:
+  serverId: devops-jfrog
+  repo: devops-demo-repo-libs-snapshot
+EOF
+  displayName: 'Create JFrog CLI Maven project config'
+
+- script: >
+    jfrog rt mvn "deploy"
+    --build-name="jfrog-maven-build"
+    --build-number="$(Build.BuildId)"
+  displayName: 'Deploy to Artifactory using JFrog CLI'
 
 - script: |
     jfrog rt build-publish jfrog-maven-build $(Build.BuildId)
-  displayName: 'Publish Build Info'
+  displayName: 'Publish Build Info to Artifactory'
