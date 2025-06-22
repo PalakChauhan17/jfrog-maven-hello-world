@@ -31,22 +31,19 @@ steps:
 
 - script: |
     mkdir -p ~/.jfrog/projects
-    cat > ~/.jfrog/projects/maven.yaml <<EOF
-type: maven
+    echo "type: maven
 resolver:
   serverId: devops-jfrog
   repo: devops-demo-repo-libs-snapshot
 deployer:
   serverId: devops-jfrog
-  repo: devops-demo-repo-libs-snapshot
-EOF
+  repo: devops-demo-repo-libs-snapshot" > ~/.jfrog/projects/maven.yaml
   displayName: 'Create JFrog CLI Maven project config'
 
-
-- script: >
-    jfrog rt mvn "deploy"
-    --build-name="jfrog-maven-build"
-    --build-number="$(Build.BuildId)"
+- script: |
+    jfrog rt mvn "deploy" \
+      --build-name="jfrog-maven-build" \
+      --build-number="$(Build.BuildId)"
   displayName: 'Deploy to Artifactory using JFrog CLI'
 
 - script: |
