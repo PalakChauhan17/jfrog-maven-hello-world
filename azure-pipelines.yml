@@ -9,7 +9,7 @@ variables:
   ARTIFACTORY_REPO: 'devops-demo-repo-libs-snapshot'
   MAVEN_PROJECT_DIR: '.'
 
-# Link your variable group that holds secrets
+# ✅ This should be a separate `variables` block (array format)
 - group: JFrog-Secrets
 
 steps:
@@ -28,7 +28,7 @@ steps:
       --interactive=false
   displayName: 'Configure JFrog CLI'
 
-# FIXED: Use echo to safely create the YAML file line by line
+# 🔧 Safe echo-based config creation
 - script: |
     mkdir -p ~/.jfrog/projects
     echo "type: maven" > ~/.jfrog/projects/maven.yaml
