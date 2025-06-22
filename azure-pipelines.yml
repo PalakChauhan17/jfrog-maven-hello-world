@@ -42,6 +42,7 @@ deployer:
 EOF
   displayName: 'Create JFrog CLI Maven project config'
 
+
 - script: >
     jfrog rt mvn "deploy"
     --build-name="jfrog-maven-build"
