@@ -21,7 +21,7 @@ steps:
 
 - script: |
     jfrog config add devops-jfrog \
-      --url=https://trialrgyqe6.jfrog.io/artifactory \
+      --url=https://trialrgyqe6.jfrog.io \
       --user=$(artifactoryUser) \
       --password=$(artifactoryPassword) \
       --interactive=false
