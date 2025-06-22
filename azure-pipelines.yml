@@ -10,7 +10,6 @@ variables:
   MAVEN_PROJECT_DIR: '.'
 
 # Link your variable group that holds secrets
-variables:
 - group: JFrog-Secrets
 
 steps:
@@ -29,17 +28,16 @@ steps:
       --interactive=false
   displayName: 'Configure JFrog CLI'
 
+# FIXED: Use echo to safely create the YAML file line by line
 - script: |
     mkdir -p ~/.jfrog/projects
-    cat > ~/.jfrog/projects/maven.yaml <<EOF
-type: maven
-resolver:
-  serverId: devops-jfrog
-  repo: devops-demo-repo-libs-snapshot
-deployer:
-  serverId: devops-jfrog
-  repo: devops-demo-repo-libs-snapshot
-EOF
+    echo "type: maven" > ~/.jfrog/projects/maven.yaml
+    echo "resolver:" >> ~/.jfrog/projects/maven.yaml
+    echo "  serverId: devops-jfrog" >> ~/.jfrog/projects/maven.yaml
+    echo "  repo: devops-demo-repo-libs-snapshot" >> ~/.jfrog/projects/maven.yaml
+    echo "deployer:" >> ~/.jfrog/projects/maven.yaml
+    echo "  serverId: devops-jfrog" >> ~/.jfrog/projects/maven.yaml
+    echo "  repo: devops-demo-repo-libs-snapshot" >> ~/.jfrog/projects/maven.yaml
   displayName: 'Create JFrog CLI Maven project config'
 
 - script: |
