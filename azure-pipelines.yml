@@ -30,7 +30,17 @@ steps:
   displayName: 'Maven Build'
 
 - script: |
-    jfrog rt mvn "deploy" pom.xml \
-      --build-name="jfrog-maven-build" \
-      --build-number="$(Build.BuildId)"
+    jfrog rt mvnc \
+      --server-id-resolve=devops-jfrog \
+      --repo-resolve=snapshots \
+      --server-id-deploy=devops-jfrog \
+      --repo-deploy=$(ARTIFACTORY_REPO)
+  displayName: 'Configure JFrog Maven Integration'
+
+- script: >
+    jfrog rt mvn "deploy"
+    --build-name="jfrog-maven-build"
+    --build-number="$(Build.BuildId)"
   displayName: 'Deploy to Artifactory using JFrog CLI'
+
+
