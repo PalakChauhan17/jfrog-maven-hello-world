@@ -16,8 +16,12 @@ steps:
   displayName: 'Install JFrog CLI'
 
 - script: |
+    echo "ARTIFACTORY_URL is: '$(ARTIFACTORY_URL)'"
+  displayName: 'Debug: Show Artifactory URL'
+
+- script: |
     jfrog config add devops-jfrog \
-      --url=$(ARTIFACTORY_URL) \
+      --url=https://trialrgyqe6.jfrog.io/artifactory \
       --user=$(artifactoryUser) \
       --password=$(artifactoryPassword) \
       --interactive=false
