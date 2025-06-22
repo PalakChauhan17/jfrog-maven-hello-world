@@ -31,16 +31,16 @@ steps:
 
 - script: |
     mkdir -p ~/.jfrog/projects
-    echo 'type: maven
+    cat > ~/.jfrog/projects/maven.yaml <<EOF
+type: maven
 resolver:
   serverId: devops-jfrog
   repo: devops-demo-repo-libs-snapshot
 deployer:
   serverId: devops-jfrog
   repo: devops-demo-repo-libs-snapshot
-' > ~/.jfrog/projects/maven.yaml
+EOF
   displayName: 'Create JFrog CLI Maven project config'
-
 
 - script: >
     jfrog rt mvn "deploy"
